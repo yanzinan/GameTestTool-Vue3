@@ -61,13 +61,13 @@
                                 当前事件类型{{item.event.type}}  该事件请求用时{{item.event.second}}秒
                             </template>
                         </n-alert>
+                        <div class="desc">事件说明：</div>
                         <n-card
                             title=""
                             content-scrollable
                             :style="{'max-height':item.event.type == 'end' ? '250px' : item.event.type == 'combat' ?'210px' : '150px'}"
                             segmented
                         >
-                            事件说明:
                             <!-- title -->
                             <div class="storyTitle">{{item.ai_state.title}}</div>
                             <!-- 故事剧情 -->
@@ -105,6 +105,7 @@
             
                         </n-card>
                         <!-- npc对话 -->
+                        <div class="desc" v-if="item.event.type != 'combat' && item.event.type != 'end'">NPC讲解：</div>
                         <n-card
                             title=""
                             content-scrollable
@@ -112,7 +113,6 @@
                             segmented
                             v-if="item.event.type != 'combat' && item.event.type != 'end'"
                         >
-                            NPC讲解：<br>
                             <template v-if="item.event.type == 'init' ">
                                 {{item.payload.opening.npc_line}}
                             </template>
@@ -861,12 +861,16 @@ onUnmounted(() => {
     }
 
     .cardHeight{
-        height: 500px;
+        height: 560px;
     }
 
     .storyTitle{
         font-size: 14px;
         margin: 6px 0;
         font-weight: 600;
+    }
+
+    .desc{
+        width: 100%;
     }
 </style>
