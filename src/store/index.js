@@ -11,7 +11,7 @@ export const useGlobalStore = defineStore('global', {
     slotsInit:null,
     id:null,
     difficulty:'',
-    hard_limit_seconds:300,
+    hard_limit_seconds:10,
     history_events_limit:14
   }),
   actions: {

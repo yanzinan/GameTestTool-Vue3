@@ -3,7 +3,8 @@
     <n-grid x-gap="12" :cols="1">
         <n-gi>
             <n-alert title="alert" type="info">
-                当前版本号：1.0.0
+                当前版本号：1.0.0<br>
+                若需要重新测试，请点击浏览器的刷新按钮，刷新页面即可重新开始
             </n-alert>
         </n-gi>
     </n-grid>
@@ -39,6 +40,10 @@
                             npc_bias:偏好 NPC 原型
                         </n-card>
                         <n-button type="info" style="width:100%" @click="requestInit" :disabled="requestInitDisabled">开局</n-button>
+                        <n-card title="" v-if="countShow">
+                            倒计时：{{count >= globalStore.hard_limit_seconds ? '0' : globalStore.hard_limit_seconds - count}}秒
+                        </n-card>
+                        
                     </n-space>
                 </n-card>
             </n-gi>
@@ -59,10 +64,10 @@
                         <n-card
                             title=""
                             content-scrollable
-                            style="max-height: 150px"
-                            :style="{'max-height':item.event.type == 'end' ? '250px' : '150px'}"
+                            :style="{'max-height':item.event.type == 'end' ? '250px' : item.event.type == 'combat' ?'210px' : '150px'}"
                             segmented
                         >
+                            事件说明:
                             <!-- title -->
                             <div class="storyTitle">{{item.ai_state.title}}</div>
                             <!-- 故事剧情 -->
@@ -100,18 +105,21 @@
             
                         </n-card>
                         <!-- npc对话 -->
-                        <div class="npcLine">
+                        <n-card
+                            title=""
+                            content-scrollable
+                            style="max-height: 80px"
+                            segmented
+                            v-if="item.event.type != 'combat' && item.event.type != 'end'"
+                        >
+                            NPC讲解：<br>
                             <template v-if="item.event.type == 'init' ">
-                                <n-ellipsis :line-clamp="2">
-                                    {{item.payload.opening.npc_line}}
-                                </n-ellipsis>
+                                {{item.payload.opening.npc_line}}
                             </template>
                             <template v-if="item.event.type == 'decision' || item.event.type == 'puzzle' ">
-                                <n-ellipsis :line-clamp="2">
-                                    {{item.payload.scene.npc_line}}
-                                </n-ellipsis>
+                                {{item.payload.scene.npc_line}}
                             </template>
-                        </div>
+                        </n-card>
                         <n-button :type="items.buttonType" style="width:100%" v-for="items in item.payload.options" :key="items.id" @click="selectOptions(items.id,items.text,item.routing.next_event_type,index,items)" :disabled="items.disabled">
                             {{items.text}}
                         </n-button>
@@ -193,6 +201,9 @@ const slotsDisabled = ref(false)
 const requestInitDisabled = ref(false)
 // 生成微小说按钮禁用
 const GenerateNovelDisabled = ref(false)
+
+// 展示倒计时
+const countShow = ref(false)
 // 生成游戏id
 /**
  * 生成8位纯数字随机ID
@@ -218,8 +229,6 @@ const getSlots = async () => {
     generate8DigitNumberID()
     // 按钮设置为不可操作
     active.value = true
-    // 启动定时器计时
-    startTimer()
     // 按钮禁用
     slotsDisabled.value = true;
   } catch (err) {
@@ -279,6 +288,9 @@ const requestInit = async () => {
     let eventTimer = setInterval(() => {
         eventCount++
     }, 1000) // 1000ms = 1秒
+    // 启动游戏计时
+    countShow.value = true
+    startTimer()
     try{
         let paramIn = {
             "event": {
@@ -849,13 +861,7 @@ onUnmounted(() => {
     }
 
     .cardHeight{
-        height: 480px;
-    }
-
-    .npcLine{
-        width: 100%;
-        font-size: 14px;
-        line-height: 30px;
+        height: 500px;
     }
 
     .storyTitle{
